@@ -208,7 +208,7 @@ stages:
         testResultsFormat: JUnit
         testResultsFiles: JUnit.xml
 
-- stage: 'Staging Swap'
+- stage: 'Swap'
   displayName: 'Deploy to the staging environment'
   dependsOn: Staging
   jobs:
