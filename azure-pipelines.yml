@@ -3,15 +3,6 @@ trigger:
 
 variables:
   buildConfiguration: 'Release'
-  releaseBranchName: 'release'
-
-schedules:
-- cron: '0 3 * * *'
-  displayName: 'Deploy every day at 3 A.M.'
-  branches:
-    include:
-    - release
-  always: false 
 
 stages:
 - stage: 'Build'
@@ -80,14 +71,8 @@ stages:
       artifact: drop
 
 - stage: 'Dev'
-  displayName: 'Deploy the web application'
+  displayName: 'Deploy to the dev environment'
   dependsOn: Build
-  condition: |
-    and
-    (
-      succeeded(),
-      eq(variables['Build.SourceBranchName'], variables['releaseBranchName'])
-    )
   jobs:
   - deployment: Deploy
     pool:
@@ -111,7 +96,6 @@ stages:
 - stage: 'Test'
   displayName: 'Deploy to the test environment'
   dependsOn: Dev
-  #condition: eq(variables['Build.Reason'], 'Schedule')
   jobs:
   - deployment: Deploy
     pool:
