@@ -12,24 +12,19 @@ namespace UITests
     [TestFixture("Chrome")]
     [TestFixture("Firefox")]
     [TestFixture("Edge")]
-    public class HomePageTest
-    {
+    public class HomePageTest {
         private string browser;
         private IWebDriver driver;
 
-        public HomePageTest(string browser)
-        {
+        public HomePageTest(string browser) {
             this.browser = browser;
         }
 
         [OneTimeSetUp]
-        public void Setup()
-        {
-            try
-            {
+        public void Setup() {
+            try {
                 // Create the driver for the current browser.
-                switch(browser)
-                {
+                switch(browser) {
                   case "Chrome":
                     driver = new ChromeDriver(
                         Environment.GetEnvironmentVariable("ChromeWebDriver")
@@ -43,8 +38,7 @@ namespace UITests
                   case "Edge":
                     driver = new EdgeDriver(
                         Environment.GetEnvironmentVariable("EdgeWebDriver"),
-                        new EdgeOptions
-                        {
+                        new EdgeOptions {
                             UseChromium = true
                         }
                     );
@@ -68,22 +62,18 @@ namespace UITests
                         .ExecuteScript("return document.readyState")
                         .Equals("complete"));
             }
-            catch (DriverServiceNotFoundException)
-            {
+            catch (DriverServiceNotFoundException) {
                 Console.WriteLine("DriverServiceNotFoundException");
             }
-            catch (WebDriverException)
-            {
+            catch (WebDriverException) {
                 Console.WriteLine("WebDriverException");
                 Cleanup();
             }
         }
     
         [OneTimeTearDown]
-        public void Cleanup()
-        {
-            if (driver != null)
-            {
+        public void Cleanup() {
+            if (driver != null) {
                 driver.Quit();
             }
         }
@@ -94,12 +84,10 @@ namespace UITests
         [TestCase("screen-01", "screen-modal")]
         // // Top player on the leaderboard
         [TestCase("profile-1", "profile-modal-1")]
-        public void ClickLinkById_ShouldDisplayModalById(string linkId, string modalId)
-        {
+        public void ClickLinkById_ShouldDisplayModalById(string linkId, string modalId) {
             // Skip the test if the driver could not be loaded.
             // This happens when the underlying browser is not installed.
-            if (driver == null)
-            {
+            if (driver == null) {
                 Assert.Ignore();
                 return;
             }
@@ -114,8 +102,7 @@ namespace UITests
             bool modalWasDisplayed = (modal != null && modal.Displayed);
 
             // Close the modal if it was displayed.
-            if (modalWasDisplayed)
-            {
+            if (modalWasDisplayed) {
                 // Click the close button that's part of the modal.
                 ClickElement(FindElement(By.ClassName("close"), modal));
                 
@@ -128,21 +115,17 @@ namespace UITests
             Assert.That(modalWasDisplayed, Is.True);
         }
 
-        private IWebElement FindElement(By locator, IWebElement parent = null, int timeoutSeconds = 10)
-        {
+        private IWebElement FindElement(By locator, IWebElement parent = null, int timeoutSeconds = 10) {
             // WebDriverWait enables us to wait for the specified condition to be true
             // within a given time period.
             return new WebDriverWait(driver, TimeSpan.FromSeconds(timeoutSeconds))
                 .Until(c => {
                     IWebElement element = null;
                     // If a parent was provided, find its child element.
-                    if (parent != null)
-                    {
+                    if (parent != null) {
                         element = parent.FindElement(locator);
-                    }
-                    // Otherwise, locate the element from the root of the DOM.
-                    else
-                    {
+                    } else {
+                        // Otherwise, locate the element from the root of the DOM.
                         element = driver.FindElement(locator);
                     }
                     // Return true once the element is displayed and able to receive user input.
@@ -150,8 +133,7 @@ namespace UITests
                 });
         }
 
-        private void ClickElement(IWebElement element)
-        {
+        private void ClickElement(IWebElement element) {
             // We expect the driver to implement IJavaScriptExecutor.
             // IJavaScriptExecutor enables us to execute JavaScript code during the tests.
             IJavaScriptExecutor js = driver as IJavaScriptExecutor;
