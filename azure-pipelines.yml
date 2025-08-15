@@ -170,8 +170,20 @@ stages:
             displayName: 'Azure App Service Deploy: website'
             inputs:
               azureSubscription: 'Resource Manager - Tailspin - Space Game'
+              deployToSlotOrASE: 'true'
+              resourceGroupName: 'tailspin-space-game-rg'
+              slotName: 'swap'
               appName: '$(WebAppNameStaging)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
+          # - task: AzureAppServiceManage@0
+          #   displayName: 'Swap deployment slots'
+          #   inputs:
+          #     azureSubscription: 'Resource Manager - Tailspin - Space Game'
+          #     resourceGroupName: 'tailspin-space-game-rg'
+          #     webAppName: '$(WebAppNameStaging)'
+          #     sourceSlot: 'swap'
+          #     targetSlot: 'production'
+          #     action: 'Swap Slots'
   - job: RunLoadTests
     dependsOn: Deploy
     displayName: 'Run load tests'
@@ -195,3 +207,38 @@ stages:
       inputs:
         testResultsFormat: JUnit
         testResultsFiles: JUnit.xml
+
+- stage: 'Staging Swap'
+  displayName: 'Deploy to the staging environment'
+  dependsOn: Staging
+  jobs:
+  - deployment: Deploy
+    pool:
+      vmImage: 'ubuntu-latest'
+    environment: staging
+    variables:
+    - group: 'Release'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: drop
+          - task: AzureAppServiceManage@0
+            displayName: 'Swap deployment slots'
+            inputs:
+              azureSubscription: 'Resource Manager - Tailspin - Space Game'
+              resourceGroupName: 'tailspin-space-game-rg'
+              webAppName: '$(WebAppNameStaging)'
+              sourceSlot: 'swap'
+              targetSlot: 'production'
+              action: 'Swap Slots'
+          - task: AzureWebApp@1
+            displayName: 'Azure App Service Deploy: website'
+            inputs:
+              azureSubscription: 'Resource Manager - Tailspin - Space Game'
+              deployToSlotOrASE: 'true'
+              resourceGroupName: 'tailspin-space-game-rg'
+              slotName: 'swap'
+              appName: '$(WebAppNameStaging)'
+              package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
